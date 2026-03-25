@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 import { getSupabaseClient } from "@/lib/supabase";
 import { Bed, Users, IndianRupee, ShoppingCart } from "lucide-react";
 import { cn } from "@/lib/utils";
