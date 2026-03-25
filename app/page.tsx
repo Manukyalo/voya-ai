@@ -14,8 +14,8 @@ export default function Home() {
     <div className="flex min-h-screen flex-col bg-earth-sand">
       {/* Navigation */}
       <nav className="flex items-center justify-between px-8 py-6 max-w-7xl mx-auto w-full">
-        <div className="flex items-center gap-2">
-          <Mountain className="h-8 w-8 text-earth-amber" />
+        <div className="flex items-center gap-3">
+          <img src="/logo.png" alt="Voya AI Logo" className="h-10 w-10 object-contain rounded-lg shadow-sm" />
           <span className="text-2xl font-serif font-bold text-earth-forest tracking-tight">Voya AI</span>
         </div>
         <div className="flex items-center gap-6">

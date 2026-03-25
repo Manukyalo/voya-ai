@@ -21,8 +21,9 @@ export function Sidebar() {
 
   return (
     <div className="flex h-full w-64 flex-col bg-earth-forest text-earth-sand">
-      <div className="flex h-20 items-center px-6">
-        <h1 className="text-2xl font-serif font-bold tracking-tight text-earth-amber">
+      <div className="flex h-20 items-center px-6 gap-3 pt-6">
+        <img src="/logo.png" alt="Voya AI Logo" className="h-10 w-10 object-contain rounded-lg brightness-110" />
+        <h1 className="text-xl font-serif font-bold tracking-tight text-earth-amber leading-tight">
           {lodgeName}
         </h1>
       </div>
