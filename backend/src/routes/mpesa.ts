@@ -2,8 +2,32 @@ import { FastifyInstance, FastifyPluginAsync } from 'fastify';
 import { Type } from '@sinclair/typebox';
 
 const mpesaRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
+  const mpesaEnabled = 
+    process.env.MPESA_CONSUMER_KEY !== 'placeholder' &&
+    process.env.MPESA_CONSUMER_KEY !== undefined &&
+    process.env.MPESA_CONSUMER_KEY !== '';
+
+  if (!mpesaEnabled) {
+    fastify.log.warn('M-Pesa credentials not configured — webhook endpoint is inactive');
+  }
+
+  // GET /status - check if M-Pesa is active
+  fastify.get('/status', async () => {
+    return { 
+      enabled: mpesaEnabled,
+      message: mpesaEnabled ? 'M-Pesa is configured' : 'M-Pesa credentials pending'
+    };
+  });
+
   // Public Endpoint - NO JWT Verification required for webhooks
   fastify.post('/webhook', async (request, reply) => {
+    if (!mpesaEnabled) {
+      return reply.code(503).send({ 
+        error: true, 
+        message: 'M-Pesa not configured yet' 
+      });
+    }
+
     const payload = request.body as any;
     const callback = payload?.Body?.stkCallback;
 
@@ -39,14 +63,12 @@ const mpesaRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
         raw_payload: payload
       }]);
 
-    // 2. Update the booking status if MerchantRequestID matches
-    // Note: We need to match by CheckoutRequestID or MerchantRequestID stored in a hypothetical 'mpesa_checkouts' table or similar.
-    // Assuming we store CheckoutRequestID on the booking table during STK push.
+    // 2. Update the booking status
     if (ResultCode === 0) {
         await fastify.supabase
             .from('bookings')
             .update({ payment_status: 'paid' })
-            .eq('id', MerchantRequestID); // Simplified matching for this implementation
+            .eq('id', MerchantRequestID);
     } else {
         await fastify.supabase
             .from('bookings')

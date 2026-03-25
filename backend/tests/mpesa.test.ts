@@ -9,7 +9,9 @@ const mockSupabase = {
   eq: vi.fn(() => Promise.resolve({ error: null })),
 };
 
-describe('M-Pesa Webhook', () => {
+const skipMpesa = process.env.MPESA_CONSUMER_KEY === 'placeholder' || !process.env.MPESA_CONSUMER_KEY;
+
+describe.skipIf(skipMpesa)('M-Pesa webhook', () => {
   let fastify: any;
 
   beforeAll(async () => {
@@ -47,4 +49,24 @@ describe('M-Pesa Webhook', () => {
     expect(JSON.parse(response.payload).ResultCode).toBe(0);
     expect(mockSupabase.from).toHaveBeenCalledWith('mpesa_events');
   });
+});
+
+describe('M-Pesa status', () => {
+    let fastify: any;
+
+    beforeAll(async () => {
+      fastify = Fastify();
+      fastify.decorate('supabase', mockSupabase);
+      fastify.register(mpesaRoutes);
+    });
+
+    it('GET /status - should return connectivity status', async () => {
+        const response = await fastify.inject({
+          method: 'GET',
+          url: '/status'
+        });
+    
+        expect(response.statusCode).toBe(200);
+        expect(JSON.parse(response.payload)).toHaveProperty('enabled');
+    });
 });
