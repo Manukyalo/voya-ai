@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, TrendingUp, Calendar, ShoppingBag, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, TrendingUp, Calendar, ShoppingBag, Settings } from "lucide-react";
 import { UserButton, useUser } from "@clerk/nextjs";
 import { cn } from "@/lib/utils";
 

@@ -34,7 +34,7 @@ export default function RevenuePage() {
     <div className="space-y-8 animate-in fade-in duration-700">
       <div>
         <h2 className="text-3xl font-serif font-bold text-earth-forest">Revenue Intelligence</h2>
-        <p className="mt-1 text-sm text-earth-muted">Deep dive into your lodge's financial health.</p>
+        <p className="mt-1 text-sm text-earth-muted">Deep dive into your lodge&apos;s financial health.</p>
       </div>
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">

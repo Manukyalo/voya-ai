@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { ArrowRight, Mountain, ShieldCheck, Zap } from "lucide-react";
 import { SignInButton, SignUpButton } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
