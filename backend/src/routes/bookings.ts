@@ -17,19 +17,32 @@ const bookingsRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
   fastify.get('/', {
     schema: {
       querystring: Type.Object({
-        status: Type.Optional(Type.String())
+        status: Type.Optional(Type.String()),
+        search: Type.Optional(Type.String()),
+        page: Type.Optional(Type.Number({ minimum: 1 })),
+        pageSize: Type.Optional(Type.Number({ minimum: 1, maximum: 100 }))
       })
     }
   }, async (request, reply) => {
-    const { status } = request.query as { status?: string };
+    const { status, search, page = 1, pageSize = 20 } = request.query as {
+      status?: string;
+      search?: string;
+      page?: number;
+      pageSize?: number;
+    };
     
     let query = fastify.supabase
       .from('bookings')
       .select('*, guests(*)')
-      .eq('lodge_id', request.lodge_id);
+      .eq('lodge_id', request.lodge_id)
+      .order('created_at', { ascending: false })
+      .range((page - 1) * pageSize, page * pageSize - 1);
 
     if (status) {
       query = query.eq('status', status);
+    }
+    if (search) {
+      query = query.ilike('guests.full_name', `%${search}%`);
     }
 
     const { data, error } = await query;
@@ -67,6 +80,25 @@ const bookingsRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
     return reply.code(201).send(data);
   });
 
+  // PUT /:id - update booking details
+  fastify.put('/:id', {
+    schema: { body: BookingSchema }
+  }, async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const body = request.body as any;
+
+    const { data, error } = await fastify.supabase
+      .from('bookings')
+      .update(body)
+      .eq('id', id)
+      .eq('lodge_id', request.lodge_id)
+      .select('*, guests(*)')
+      .single();
+
+    if (error) return reply.code(400).send({ error: true, message: error.message, code: 400 });
+    return data;
+  });
+
   // PUT /:id/status - update booking status
   fastify.put('/:id/status', {
     schema: {
@@ -88,6 +120,19 @@ const bookingsRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
 
     if (error) return reply.code(400).send({ error: true, message: error.message, code: 400 });
     return data;
+  });
+
+  // DELETE /:id - remove booking
+  fastify.delete('/:id', async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const { error } = await fastify.supabase
+      .from('bookings')
+      .delete()
+      .eq('id', id)
+      .eq('lodge_id', request.lodge_id);
+
+    if (error) return reply.code(400).send({ error: true, message: error.message, code: 400 });
+    return reply.code(204).send();
   });
 };
 
